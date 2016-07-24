@@ -30,7 +30,6 @@ public class WorldRotation : MonoBehaviour
        C# automatically initializes members to their default values
    */
   private float cooldown;
-  //private float playerOrientation = 0.0f;
   private float playerOrientation; // self defined - 0.0 indicates ABSOLUTE UP
   private new Transform camera;
 
@@ -62,18 +61,6 @@ public class WorldRotation : MonoBehaviour
     {
       Physics2D.gravity = GRAVITY_PULL_LEFT;
     }
-
-
-    ////Up and down
-    //if (playerOrientation == 0.0f)
-    //  Physics2D.gravity = new Vector2(0.0f, -1.0f);
-    //else if (playerOrientation == 180.0f || playerOrientation == -180.0f)
-    //  Physics2D.gravity = new Vector2(0.0f, 1.0f);
-    ////Left and Right
-    //else if(playerOrientation == 90.0f || playerOrientation == -270.0f)
-    //  Physics2D.gravity = new Vector2(1.0f, .0f);
-    //else if(playerOrientation == -90.0f || playerOrientation == 270.0f)
-    //  Physics2D.gravity = new Vector2(-1.0f, .0f);
   }
 
   void Rotate(float orientationChange)
@@ -99,7 +86,7 @@ public class WorldRotation : MonoBehaviour
         A wonderful thing they do at IW is they just hard assert if something's wrong. 
         That way if an assumed condition is every failed, shit breaks and you HAVE to fix it before shipping.
     */
-    //Debug.Assert( camera != null , "No camera attached to object with WorldRotation component. Attach camera and try again." );
+    Debug.Assert( camera != null , "No camera attached to object with WorldRotation component. Attach camera and try again." );
 
     /*
       Mike's Notes:
@@ -107,9 +94,6 @@ public class WorldRotation : MonoBehaviour
         Left it here so you can check it out if you'd like.
     */
     DO_TEST();
-
-    // Again; already set to default float value.
-    //cooldown = 0.0f;
   }
 
   // Update is called once per frame
@@ -128,57 +112,18 @@ public class WorldRotation : MonoBehaviour
     {
       /*
         Mike's Notes:
-          Save them flops.
+          Move the contents of each action out 
       */
 
       if (Input.GetKeyDown(KeyCode.LeftArrow))
       {
         Rotate(90.0f);
-        //playerOrientation += 90.0f;
-        //this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-        //cooldown = Rotation_Cooldown;
       }
       else if (Input.GetKeyDown(KeyCode.RightArrow))
       {
         Rotate(-90.0f);
-        //playerOrientation -= 90.0f;
-        //this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-        //cooldown = Rotation_Cooldown;
       }
     }
-
-    //cooldown -= Time.deltaTime;
-    //if (cooldown < 0)
-    //{
-    //  if (Input.GetKeyDown(KeyCode.LeftArrow))
-    //  {
-    //    playerOrientation += 90.0f;
-    //    this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-    //    cooldown = Rotation_Cooldown;
-    //  }
-    //  else if (Input.GetKeyDown(KeyCode.RightArrow))
-    //  {
-    //    playerOrientation -= 90.0f;
-    //    this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-    //    cooldown = Rotation_Cooldown;
-    //  }
-    //}
-
-
-    /*
-      Mike's Notes:
-        Same kind fo stuff as in SetWorldGravity(). Float comparisons and etc.
-    */
-    //if (Mathf.Abs(playerOrientation - -360) < FLOAT_DELTA || Mathf.Abs(playerOrientation - 360) < FLOAT_DELTA)
-    //{
-    //  playerOrientation = 0.0f;
-    //}
-
-    //if (playerOrientation == -360 || playerOrientation == 360)
-    //  playerOrientation = 0;
-
-    //camera.rotation = Quaternion.Slerp(camera.rotation, this.transform.rotation, Rotation_Speed * .01f);
-    //SetWorldGravity();
   }
 
   void DO_TEST()

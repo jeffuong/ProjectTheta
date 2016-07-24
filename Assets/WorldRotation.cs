@@ -22,6 +22,7 @@ public class WorldRotation : MonoBehaviour
   public float Rotation_Speed;
 
   //In seconds
+  [Range(0.0f, float.MaxValue)] // recommend we don't allow negative cd.
   public float Rotation_Cooldown;
 
   /*
@@ -74,6 +75,22 @@ public class WorldRotation : MonoBehaviour
     //else if(playerOrientation == -90.0f || playerOrientation == 270.0f)
     //  Physics2D.gravity = new Vector2(-1.0f, .0f);
   }
+
+  void Rotate(float orientationChange)
+  {
+    playerOrientation += orientationChange;
+    this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
+    cooldown = Rotation_Cooldown;
+
+    if (Mathf.Abs(playerOrientation - -360) < FLOAT_DELTA || Mathf.Abs(playerOrientation - 360) < FLOAT_DELTA)
+    {
+      playerOrientation = 0.0f;
+    }
+
+    camera.rotation = Quaternion.Slerp(camera.rotation, this.transform.rotation, Rotation_Speed * .01f);
+    SetWorldGravity();
+  }
+
   void Start()
   {
     camera = GameObject.FindGameObjectWithTag("MainCamera").transform;
@@ -109,17 +126,24 @@ public class WorldRotation : MonoBehaviour
     }
     else
     {
+      /*
+        Mike's Notes:
+          Save them flops.
+      */
+
       if (Input.GetKeyDown(KeyCode.LeftArrow))
       {
-        playerOrientation += 90.0f;
-        this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-        cooldown = Rotation_Cooldown;
+        Rotate(90.0f);
+        //playerOrientation += 90.0f;
+        //this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
+        //cooldown = Rotation_Cooldown;
       }
       else if (Input.GetKeyDown(KeyCode.RightArrow))
       {
-        playerOrientation -= 90.0f;
-        this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-        cooldown = Rotation_Cooldown;
+        Rotate(-90.0f);
+        //playerOrientation -= 90.0f;
+        //this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
+        //cooldown = Rotation_Cooldown;
       }
     }
 
@@ -145,16 +169,16 @@ public class WorldRotation : MonoBehaviour
       Mike's Notes:
         Same kind fo stuff as in SetWorldGravity(). Float comparisons and etc.
     */
-    if (Mathf.Abs(playerOrientation - -360) < FLOAT_DELTA || Mathf.Abs(playerOrientation - 360) < FLOAT_DELTA)
-    {
-      playerOrientation = 0.0f;
-    }
+    //if (Mathf.Abs(playerOrientation - -360) < FLOAT_DELTA || Mathf.Abs(playerOrientation - 360) < FLOAT_DELTA)
+    //{
+    //  playerOrientation = 0.0f;
+    //}
 
     //if (playerOrientation == -360 || playerOrientation == 360)
     //  playerOrientation = 0;
 
-    camera.rotation = Quaternion.Slerp(camera.rotation, this.transform.rotation, Rotation_Speed * .01f);
-    SetWorldGravity();
+    //camera.rotation = Quaternion.Slerp(camera.rotation, this.transform.rotation, Rotation_Speed * .01f);
+    //SetWorldGravity();
   }
 
   void DO_TEST()
@@ -180,7 +204,7 @@ public class WorldRotation : MonoBehaviour
     System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
     sw.Start();
     float time = 1.0f;
-    for (int i = 0; i < 1024 * 1024 * 1024; ++i)
+    for (int i = 0; i < 1024 * 1024; ++i)
     {
       if (0.0f < time)
       {
@@ -202,7 +226,7 @@ public class WorldRotation : MonoBehaviour
     System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
     sw.Start();
     float time = 1.0f;
-    for (int i = 0; i < 1024 * 1024 * 1024; ++i)
+    for (int i = 0; i < 1024 * 1024; ++i)
     {
       time -= Time.deltaTime;
       if (time < 0.0f)

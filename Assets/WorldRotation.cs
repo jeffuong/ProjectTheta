@@ -31,71 +31,51 @@ public class WorldRotation : MonoBehaviour
    */
   private float cooldown;
   private float playerOrientation;  // self defined - 0.0 indicates ABSOLUTE UP
-  private float absOrientation;     // For easy baby math
+  private Vector3 eulerOrientation; // struct - value type - already allocated
   private new Transform camera;
-
 
   void SetWorldGravity()
   {
-    /*
-       Michael's Notes
-          Change code to use new constants defined above.
-          Took the overhead of getting abs Orientation to reduce if/else complexity.
-          This version just uses reference changes; no allocations.
-          Don't allow for potential floating point error to much up comparisons.
-     */
-
-    if (Mathf.Abs(absOrientation - 0.0f) < FLOAT_DELTA)
+    if (playerOrientation == 0)
     {
       Physics2D.gravity = GRAVITY_PULL_DOWN;
     }
-    else if (Mathf.Abs(absOrientation - 90.0f) < FLOAT_DELTA)
+    else if (playerOrientation == 90.0f || playerOrientation == -270.0f)
     {
       Physics2D.gravity = GRAVITY_PULL_RIGHT;
     }
-    else if (Mathf.Abs(absOrientation - 180.0f) < FLOAT_DELTA)
+    else if (playerOrientation == 180.0f || playerOrientation == -180.0f)
     {
       Physics2D.gravity = GRAVITY_PULL_UP;
     }
-    else if (Mathf.Abs(absOrientation - 270.0f) < FLOAT_DELTA)
+    else if (playerOrientation == 270.0f || playerOrientation == -90.0f)
     {
       Physics2D.gravity = GRAVITY_PULL_LEFT;
     }
   }
 
+
   void Rotate(float orientationChange)
   {
-    Debug.Log("Old orientation = " + playerOrientation + " (" + absOrientation + ")");
     playerOrientation += orientationChange;
-    absOrientation = Mathf.Abs(playerOrientation);
-    Debug.Log("New orientation = " + playerOrientation + " (" + absOrientation + ")");
 
-    if (Mathf.Abs(absOrientation - 360.0f) < FLOAT_DELTA)
+    if (playerOrientation == 360.0f || playerOrientation == -360.0f)
     {
       playerOrientation = 0.0f;
-      absOrientation = 0.0f;
-      Debug.Log("Adjusted orientation = " + playerOrientation + " (" + absOrientation + ")");
     }
 
-    this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-    Debug.Log("Player Transform = " + this.transform.eulerAngles);
+    eulerOrientation.z = playerOrientation;
+    transform.eulerAngles = eulerOrientation;
 
-    camera.rotation = Quaternion.Slerp(camera.rotation, this.transform.rotation, Rotation_Speed * .01f);
-    Debug.Log("Camera rotaiton = " + camera.rotation);
-
-    //SetWorldGravity();
+    SetWorldGravity();
 
     cooldown = Rotation_Cooldown;
   }
 
+
   void Start()
   {
     camera = GameObject.FindGameObjectWithTag("MainCamera").transform;
-    /*
-      Mike's Notes:
-        A wonderful thing they do at IW is they just hard assert if something's wrong. 
-        That way if an assumed condition is every failed, shit breaks and you HAVE to fix it before shipping.
-    */
     Debug.Assert( camera != null , "No camera attached to object with WorldRotation component. Attach camera and try again." );
 
     /*
@@ -110,29 +90,22 @@ public class WorldRotation : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    /*
-      Mike's Notes:
-        Save them flops.
-    */
-
     cooldown -= Time.deltaTime;
     if (cooldown < 0.0f)
     {
-      /*
-        Mike's Notes:
-          Move the contents of each action out 
-      */
-
       if (Input.GetKeyDown(KeyCode.LeftArrow))
-      {
-        Rotate(90.0f);
-      }
-      else if (Input.GetKeyDown(KeyCode.RightArrow))
       {
         Rotate(-90.0f);
       }
+      else if (Input.GetKeyDown(KeyCode.RightArrow))
+      {
+        Rotate(90.0f);
+      }
     }
+
+    camera.rotation = Quaternion.Slerp(camera.rotation, this.transform.rotation, Rotation_Speed * .01f);
   }
+
 
   void DO_TEST()
   {
@@ -150,6 +123,7 @@ public class WorldRotation : MonoBehaviour
     Debug.Log("\t" + TEST_FLOP());
     Debug.Log("\t" + TEST_FLOP());
   }
+
 
   long TEST_COMPARE()
   {
@@ -172,6 +146,7 @@ public class WorldRotation : MonoBehaviour
     result = sw.ElapsedTicks;
     return result;
   }
+
 
   long TEST_FLOP()
   {

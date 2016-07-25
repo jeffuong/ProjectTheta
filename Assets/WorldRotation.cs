@@ -43,13 +43,13 @@ public class WorldRotation : MonoBehaviour
     {
       if (Input.GetKeyDown(KeyCode.LeftArrow))
       {
-        playerOrientation += 90.0f;
+        playerOrientation -= 90.0f;
         this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
         cooldown = Rotation_Cooldown;
       }
       else if (Input.GetKeyDown(KeyCode.RightArrow))
       {
-        playerOrientation -= 90.0f;
+        playerOrientation += 90.0f;
         this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
         cooldown = Rotation_Cooldown;
       }

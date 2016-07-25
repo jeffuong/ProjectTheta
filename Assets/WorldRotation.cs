@@ -30,7 +30,8 @@ public class WorldRotation : MonoBehaviour
        C# automatically initializes members to their default values
    */
   private float cooldown;
-  private float playerOrientation; // self defined - 0.0 indicates ABSOLUTE UP
+  private float playerOrientation;  // self defined - 0.0 indicates ABSOLUTE UP
+  private float absOrientation;     // For easy baby math
   private new Transform camera;
 
 
@@ -43,7 +44,6 @@ public class WorldRotation : MonoBehaviour
           This version just uses reference changes; no allocations.
           Don't allow for potential floating point error to much up comparisons.
      */
-    float absOrientation = Mathf.Abs(playerOrientation);
 
     if (Mathf.Abs(absOrientation - 0.0f) < FLOAT_DELTA)
     {
@@ -65,17 +65,27 @@ public class WorldRotation : MonoBehaviour
 
   void Rotate(float orientationChange)
   {
+    Debug.Log("Old orientation = " + playerOrientation + " (" + absOrientation + ")");
     playerOrientation += orientationChange;
-    this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
-    cooldown = Rotation_Cooldown;
+    absOrientation = Mathf.Abs(playerOrientation);
+    Debug.Log("New orientation = " + playerOrientation + " (" + absOrientation + ")");
 
-    if (Mathf.Abs(playerOrientation - -360) < FLOAT_DELTA || Mathf.Abs(playerOrientation - 360) < FLOAT_DELTA)
+    if (Mathf.Abs(absOrientation - 360.0f) < FLOAT_DELTA)
     {
       playerOrientation = 0.0f;
+      absOrientation = 0.0f;
+      Debug.Log("Adjusted orientation = " + playerOrientation + " (" + absOrientation + ")");
     }
 
+    this.transform.eulerAngles = new Vector3(0.0f, 0.0f, playerOrientation);
+    Debug.Log("Player Transform = " + this.transform.eulerAngles);
+
     camera.rotation = Quaternion.Slerp(camera.rotation, this.transform.rotation, Rotation_Speed * .01f);
-    SetWorldGravity();
+    Debug.Log("Camera rotaiton = " + camera.rotation);
+
+    //SetWorldGravity();
+
+    cooldown = Rotation_Cooldown;
   }
 
   void Start()
@@ -90,10 +100,11 @@ public class WorldRotation : MonoBehaviour
 
     /*
       Mike's Notes:
-        Justification for wanting to do a comparison and then a flop in the update.
+        Wanted to check if it were faster to FLOP then compare, or compare then flop if needed.
+        Turns out it's faster to just flop.
         Left it here so you can check it out if you'd like.
     */
-    DO_TEST();
+    //DO_TEST();
   }
 
   // Update is called once per frame
@@ -103,12 +114,9 @@ public class WorldRotation : MonoBehaviour
       Mike's Notes:
         Save them flops.
     */
-    
-    if (0.0f < cooldown)
-    {
-      cooldown -= Time.deltaTime;
-    }
-    else
+
+    cooldown -= Time.deltaTime;
+    if (cooldown < 0.0f)
     {
       /*
         Mike's Notes:
@@ -128,19 +136,19 @@ public class WorldRotation : MonoBehaviour
 
   void DO_TEST()
   {
-    System.Console.WriteLine("DOING: Compare tests");
-    System.Console.WriteLine("\t" + TEST_COMPARE());
-    System.Console.WriteLine("\t" + TEST_COMPARE());
-    System.Console.WriteLine("\t" + TEST_COMPARE());
-    System.Console.WriteLine("\t" + TEST_COMPARE());
-    System.Console.WriteLine("\t" + TEST_COMPARE());
+    Debug.Log("DOING: Compare tests");
+    Debug.Log("\t" + TEST_COMPARE());
+    Debug.Log("\t" + TEST_COMPARE());
+    Debug.Log("\t" + TEST_COMPARE());
+    Debug.Log("\t" + TEST_COMPARE());
+    Debug.Log("\t" + TEST_COMPARE());
 
-    System.Console.WriteLine("DOING: Flop tests");
-    System.Console.WriteLine("\t" + TEST_FLOP());
-    System.Console.WriteLine("\t" + TEST_FLOP());
-    System.Console.WriteLine("\t" + TEST_FLOP());
-    System.Console.WriteLine("\t" + TEST_FLOP());
-    System.Console.WriteLine("\t" + TEST_FLOP());
+    Debug.Log("DOING: Flop tests");
+    Debug.Log("\t" + TEST_FLOP());
+    Debug.Log("\t" + TEST_FLOP());
+    Debug.Log("\t" + TEST_FLOP());
+    Debug.Log("\t" + TEST_FLOP());
+    Debug.Log("\t" + TEST_FLOP());
   }
 
   long TEST_COMPARE()
@@ -157,7 +165,7 @@ public class WorldRotation : MonoBehaviour
       }
       else
       {
-        time = 0.0f;
+        time = 1.0f;
       }
     }
     sw.Stop();
